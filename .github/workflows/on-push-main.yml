@@ -1,0 +1,36 @@
+name: on-push-main
+
+permissions: read-all
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  trigger-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: twz123/rerun-pr-workflows-action@d83646ab83b5bcb325cd825ffe4fef53980aa3f8
+        with:
+          workflow: on-pr-main
+
+  test-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Setup go
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5
+        with:
+          go-version: stable
+
+      - run: go mod download
+      - run: go test ./... -coverprofile=coverage.out
+      - name: Run codacy-coverage-reporter
+        uses: codacy/codacy-coverage-reporter-action@a38818475bb21847788496e9f0fddaa4e84955ba
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: coverage.out
+          force-coverage-parser: go
