@@ -1,0 +1,25 @@
+name: on-pr-main
+
+permissions: read-all
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+
+  test:
+    uses: ./.github/workflows/test.yml
+    secrets: inherit
+
+  is-rebased:
+    name: Is rebased
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      - uses: cyberark/enforce-rebase@06727bfd9d63207f0b938ce1465df8fe5fbbc837
+        with:
+          default-branch: main
